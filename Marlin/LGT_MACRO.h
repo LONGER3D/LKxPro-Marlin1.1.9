@@ -72,7 +72,13 @@
 	#define FILAMENT_RUNOUT_MOVE_Y 200
 	#define FILAMENT_RUNOUT_MOVE_F 50
 #endif // LK1_Pro
-#define	BOARD_FW_VER    "Marlin1.1.9 LGT0.3.4" 
+
+#define FW_TEST_TAG "T001"
+#ifndef FW_TEST_TAG
+	#define FW_TEST_TAG ""
+#endif
+#define	BOARD_FW_VER    "0.3.5" FW_TEST_TAG "-Marlin" 
+
 // DWIN system variable address
 #define DW_ADDR_CHANGE_PAGE 0x0084
 #define DW_PAGE_VAR_BASE 0x5A010000UL 
@@ -308,6 +314,12 @@ enum E_MENU_TYPE {
 #define ID_MENU_MEASU_S2            (114)
 #define ID_MENU_MEASU_S3            (116)
 #define ID_MENU_MEASU_FINISH        (123)
+
+enum ScreenModel {
+	SCREEN_DWIN_T5,
+	SCREEN_DWIN_T5L,
+	SCREEN_JX
+};
 
 //===========================================================================
 //===========================   PRINTER ABOUT   =============================

@@ -792,6 +792,8 @@ XYZ_CONSTS_FROM_CONFIG(signed char, home_dir, HOME_DIR);
 		#if ENABLED(POWER_LOSS_RECOVERY)
 			check_print_job_recovery();
 		#endif
+    LGT_SCR::test();
+    LGT_LCD.readScreenModel();
 	}
 	void LGT_LCD_startup_settings()
 	{

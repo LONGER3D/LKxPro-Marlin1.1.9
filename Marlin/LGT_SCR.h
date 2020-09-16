@@ -91,6 +91,30 @@ public:
 	void LGT_Printer_Data_Updata();
 	void LGT_DW_Setup();
 	void LGT_Change_Filament(int fila_len);
+
+public:
+	void readScreenModel();	
+	static void test();
+	
+private:
+	void writeData(uint16_t addr, const uint8_t *data, uint8_t size, bool isRead=false);
+	inline void writeData(uint16_t addr, uint8_t byteData, bool isRead=false)
+	{
+		writeData(addr, &byteData, 1, isRead);
+	}
+	inline void writeData(uint16_t addr, uint16_t wordData, bool isRead=false)
+	{
+		uint8_t *byte = (uint8_t *)(&wordData);	// reinterpret word to byte
+		uint8_t data[2] = {byte[1], byte[0]};	// little-endian to big-endian
+		writeData(addr, data, 2, isRead);
+
+	}
+	
+	void readData(uint16_t addr, uint8_t *data, uint8_t size);
+
+private:
+	ScreenModel _screenModel;
+
 };
 #define CHANGE_TXT_COLOR(addr,color)	LGT_Send_Data_To_Screen((uint16_t)addr,(int16_t)color)
 #define SP_COLOR_SEL_FILE_NAME			(SP_COLOR_TXT_PRINT_FILE_ITEM_0 + sel_fileid*LEN_FILE_NAME)

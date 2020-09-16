@@ -634,6 +634,8 @@ void LGT_SCR::LGT_Analysis_DWIN_Screen_Cmd()
 		LGT_Total_Time_To_String(printer_work_time, total_print_time);
 		LGT_Send_Data_To_Screen1(ADDR_TXT_ABOUT_WORK_TIME_MAC, printer_work_time);
 		break;
+////////////////////////////////////////////////////////////////////		
+// button process start		
 	case ADDR_VAL_BUTTON_KEY:
 		switch ((E_BUTTON_KEY)Rec_Data.data[0])
 		{
@@ -1532,11 +1534,12 @@ void LGT_SCR::LGT_Analysis_DWIN_Screen_Cmd()
 			}
 			break;
 #endif
-
-////////////////////////////////////////////////////////////////////////
 		default: break;
 		}
 		break;
+// button process end
+////////////////////////////////////////////////////////////////////////	
+	
 	case ADDR_VAL_FAN:
 		fanSpeeds[0] = Rec_Data.data[0];
 		break;
@@ -1561,6 +1564,8 @@ void LGT_SCR::LGT_Analysis_DWIN_Screen_Cmd()
 		/*else if (menu_type == eMENU_HOME_FILA)
 			xy_home = false;*/
 		break;
+	case ADDR_TXT_ABOUT_FW_SCREEN:
+
 	default:
 		break;
 	}
@@ -1869,4 +1874,138 @@ void DWIN_MAIN_FUNCTIONS()
 	LGT_LCD.LGT_Main_Function();
 }
 
+void LGT_SCR::writeData(uint16_t addr, const uint8_t *data, uint8_t size, bool isRead/* =false */)
+{
+	// frame header
+	data_storage[0] = DW_FH_0;
+	data_storage[1] = DW_FH_1;
+	data_storage[2] = 3 + size;
+	data_storage[3] = isRead? DW_CMD_VAR_R : DW_CMD_VAR_W;
+	// address data store in Big-endian(high byte in low address)
+	data_storage[4] = (uint8_t)(addr >> 8);		// get high byte
+	data_storage[5] = (uint8_t)(addr & 0x00FF);	// get low byte
+
+	// write header to screen
+	for (uint8_t i = 0; i < 6; i++) {
+		MYSERIAL1.print(data_storage[i]);
+		// MYSERIAL0.print(data_storage[i]);
+		delayMicroseconds(1);
+	}
+	// write data to screen
+	for (uint8_t i = 0; i < size; i++) {
+		MYSERIAL1.print(data[i]);
+		// MYSERIAL0.print(data[i]);
+		delayMicroseconds(1);
+	}	
+}
+
+/**
+ * @brief read user variable data from serial screen 
+ * 
+ * @param size number of word(2 byte) 
+ */
+void LGT_SCR::readData(uint16_t addr, uint8_t *data, uint8_t size)
+{
+	constexpr uint8_t BUFFSIZE = 32;
+	uint16_t byteLength = size * 2 + 7; // wordSize * 2 + headSize
+	if (byteLength > BUFFSIZE)
+		return;
+
+	LGT_LCD.writeData(addr, size, true);
+	// delay(1000);	// wait sometime for serial screen response
+
+	bool finish = false;
+	uint8_t buff[BUFFSIZE];
+
+	uint8_t i = 0;
+	millis_t next = millis() + 2000;
+	while (!finish && PENDING(millis(), next)) {
+		
+		while (i < BUFFSIZE && MYSERIAL1.available() > 0) {
+			uint8_t b = MYSERIAL1.read();
+			// MYSERIAL0.println(b, 16);
+			if (i == 0) { // found head 1
+				if (b == DW_FH_0)
+					buff[i++] = b;
+			} else if(i == 1) { // found head 2
+				if (b == DW_FH_1)
+					buff[i++] = b;
+				else
+					i = 0;	// reset buffer
+			} else {
+				buff[i++] = b;
+			}
+			delayMicroseconds(10);
+		}
+		if (i == byteLength) {	// check byte length at last
+			uint16_t readAddr = (uint16_t)buff[4] * 256 + buff[5];	// 2 byte >> 16
+			if (readAddr == addr && buff[6] == size) {
+				finish = true;
+				// MYSERIAL0.write((const uint8_t*)buff, (size_t)byteLength);
+			}
+		}
+	}
+
+	if (finish) {
+		for (uint8_t i = 0; i < size * 2; i++)
+			data[i] = buff[7+i];
+	}
+	// MYSERIAL0.print("i: ");
+	// MYSERIAL0.print((uint16_t)i);
+
+	// MYSERIAL0.write((const uint8_t*)buff, (size_t)byteLength);
+}
+
+void LGT_SCR::readScreenModel()
+{
+	uint8_t temp[8] = {0};	// screen firmware: #.#.#-XX
+	LGT_LCD.readData(ADDR_TXT_ABOUT_FW_SCREEN, temp, 4);
+	// MYSERIAL0.print("fw: ");
+	// MYSERIAL0.println((char *)temp);
+
+	MYSERIAL0.print("Touch Screen: ");
+	if (temp[6] == 'D' && temp[7] == 'W') {	// DWIN T5 screen
+		MYSERIAL0.println("DWIN T5");
+		_screenModel = SCREEN_DWIN_T5;
+	} else if (temp[6] == 'J' && temp[7] == 'X') { // JX screen
+		MYSERIAL0.println("JX");
+		_screenModel = SCREEN_JX;
+	} else if (temp[6] == 'D' && temp[7] == 'L') {// DWIN T5L screen
+		MYSERIAL0.println("DWIN T5L");
+		_screenModel = SCREEN_DWIN_T5L;
+	} else {
+		MYSERIAL0.print("unknown");
+		MYSERIAL0.println(", use default DWIN T5");
+		_screenModel = SCREEN_DWIN_T5;
+	}
+}
+
+void LGT_SCR::test(){
+	// delay(1000);
+	// uint8_t temp[8] = {0};
+	// LGT_LCD.readData(ADDR_TXT_ABOUT_FW_SCREEN, temp, 4);
+	// MYSERIAL0.print("fw: ");
+	// MYSERIAL0.println((char *)temp);
+
+	// MYSERIAL0.print("Touch Screen: ");
+	// if (temp[6] == 'D' && temp[7] == 'W') {	// DWIN T5 screen
+	// 	MYSERIAL0.println("DWIN T5");
+	// } else if (temp[6] == 'J' && temp[7] == 'X') { // JX screen
+	// 	MYSERIAL0.println("JX");
+	// } else if (temp[6] == 'D' && temp[7] == 'L') {// DWIN T5L screen
+	// 	MYSERIAL0.println("DWIN T5L");
+	// } else {
+	// 	MYSERIAL0.println("unknown");
+	// }
+
+	// uint8_t str[] = "abcd";
+	// LGT_LCD.writeData(0x1234, str, sizeof(str));
+
+	// uint16_t num16 = 0x5678;
+	// LGT_LCD.writeData(0x1234, num16);
+
+	// uint8_t num1 = 0xab;
+	// LGT_LCD.writeData(0x1234, num1);
+
+}
 #endif // LGT_MAC
