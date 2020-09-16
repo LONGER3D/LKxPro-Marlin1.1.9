@@ -95,7 +95,8 @@ public:
 public:
 	void readScreenModel();	
 	static void test();
-	
+	inline bool hasDwScreen() { return ((_screenModel == SCREEN_DWIN_T5) || (_screenModel == SCREEN_DWIN_T5L)); }
+	inline bool hasJxScreen() { return (_screenModel == SCREEN_JX); }
 private:
 	void writeData(uint16_t addr, const uint8_t *data, uint8_t size, bool isRead=false);
 	inline void writeData(uint16_t addr, uint8_t byteData, bool isRead=false)
@@ -114,6 +115,10 @@ private:
 
 private:
 	ScreenModel _screenModel;
+	// button enable for JX screen
+	bool _btnPauseEnabled;
+	bool _btnFilamentEnabled1;
+	bool _btnFilamentEnabled2;
 
 };
 #define CHANGE_TXT_COLOR(addr,color)	LGT_Send_Data_To_Screen((uint16_t)addr,(int16_t)color)

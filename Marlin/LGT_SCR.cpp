@@ -84,6 +84,10 @@ LGT_SCR::LGT_SCR()
 	Rec_Data.head[1]  = DW_FH_1;
 	Send_Data.head[0] = DW_FH_0;
 	Send_Data.head[1] = DW_FH_1;
+
+	_btnPauseEnabled = true;
+	_btnFilamentEnabled1 = true;
+	_btnFilamentEnabled2 = true;
 }
 
 void LGT_SCR::LGT_Change_Filament(int fila_len)
@@ -280,16 +284,27 @@ void LGT_SCR::LGT_Change_Page(unsigned int pageid)
 	memset(data_storage, 0, sizeof(data_storage));
 	data_storage[0] = DW_FH_0;
 	data_storage[1] = DW_FH_1;
-	data_storage[2] = 0x07;
-	data_storage[3] = DW_CMD_VAR_W;
-	data_storage[4] = 0x00;
-	data_storage[5] = 0x84;
-	data_storage[6] = 0x5A;
-	data_storage[7] = 0x01;
-	data_storage[8] = (unsigned char)(pageid >> 8) & 0xFF;
-	data_storage[9] = (unsigned char)(pageid & 0x00FF);
-	for (int i = 0; i < 10; i++)
-		MYSERIAL1.print(data_storage[i]);
+
+	if (hasDwScreen()) {
+		data_storage[2] = 0x07;
+		data_storage[3] = DW_CMD_VAR_W;
+		data_storage[4] = 0x00;
+		data_storage[5] = 0x84;
+		data_storage[6] = 0x5A;
+		data_storage[7] = 0x01;
+		data_storage[8] = (unsigned char)(pageid >> 8) & 0xFF;
+		data_storage[9] = (unsigned char)(pageid & 0x00FF);
+		for (int i = 0; i < 10; i++)
+			MYSERIAL1.print(data_storage[i]);
+	} else if (hasJxScreen()) {
+		data_storage[2] = 0x04;
+		data_storage[3] = JX_CMD_REG_W;
+		data_storage[4] = JX_ADDR_REG_PAGE;
+		data_storage[5] = (unsigned char)(pageid >> 8) & 0xFF;
+		data_storage[6] = (unsigned char)(pageid & 0x00FF);
+		for (int i = 0; i < 7; i++)
+			MYSERIAL1.print(data_storage[i]);		
+	}
 }
 
 
@@ -410,23 +425,45 @@ FUNCTION:	Printing SD card files to DWIN_Screen
 **************************************/
 void LGT_SCR::LGT_MAC_Send_Filename(uint16_t Addr, uint16_t Serial_Num)
 {
-	memset(data_storage, 0, sizeof(data_storage));
+
+  	card.getfilename(Serial_Num);
+	int len = strlen(card.longFilename);
 	data_storage[0] = DW_FH_0;
 	data_storage[1] = DW_FH_1;
-	data_storage[2] = 0x22;
+	data_storage[2] = len+3+2; /* 0x22 */;
 	data_storage[3] = DW_CMD_VAR_W;
 	data_storage[4] = (Addr & 0xFF00) >> 8;
 	data_storage[5] = Addr;
-	card.getfilename(Serial_Num);
-	for (int i = 0; i < 31; i++)
+	for (int i = 0; i < len/* 31 */; i++)
 	{
 		data_storage[6 + i] = card.longFilename[i];
 	}
-	for (int i = 0; i <37; i++)
+	data_storage[6 + len] = 0XFF;
+	data_storage[6 + len + 1] = 0xFF;
+	for (int i = 0; i < len + 6 + 2/* 37 */; i++)
 	{
 		MYSERIAL1.print(data_storage[i]);
 		delayMicroseconds(1);
 	}
+
+	// memset(data_storage, 0, sizeof(data_storage));
+	// data_storage[0] = DW_FH_0;
+	// data_storage[1] = DW_FH_1;
+	// data_storage[2] = 0x22;
+	// data_storage[3] = DW_CMD_VAR_W;
+	// data_storage[4] = (Addr & 0xFF00) >> 8;
+	// data_storage[5] = Addr;
+	// card.getfilename(Serial_Num);
+	// for (int i = 0; i < 31; i++)
+	// {
+	// 	data_storage[6 + i] = card.longFilename[i];
+	// }
+	// for (int i = 0; i <37; i++)
+	// {
+	// 	MYSERIAL1.print(data_storage[i]);
+	// 	delayMicroseconds(1);
+	// }
+
 }
 void LGT_SCR::LGT_Print_Cause_Of_Kill()
 {
@@ -1083,11 +1120,13 @@ void LGT_SCR::LGT_Analysis_DWIN_Screen_Cmd()
 			break;
 
 		case eBT_PRINT_HOME_PAUSE:
-			LGT_Change_Page(ID_DIALOG_PRINT_WAIT);
-			status_type = PRINTER_PAUSE;
-			card.pauseSDPrint();
-			print_job_timer.pause();
-			enqueue_and_echo_commands_P(PSTR("M2001"));
+			if (_btnPauseEnabled) {
+				LGT_Change_Page(ID_DIALOG_PRINT_WAIT);
+				status_type = PRINTER_PAUSE;
+				card.pauseSDPrint();
+				print_job_timer.pause();
+				enqueue_and_echo_commands_P(PSTR("M2001"));
+			}
 			break;
 		case eBT_PRINT_HOME_RESUME:
 				//wait_for_heatup = true;
@@ -1534,6 +1573,18 @@ void LGT_SCR::LGT_Analysis_DWIN_Screen_Cmd()
 			}
 			break;
 #endif
+		// added for JX screen
+		case eBT_PRINT_HOME_FILAMENT:
+			if (_btnFilamentEnabled1) {
+				LGT_Change_Page(ID_DIALOG_CHANGE_FILA_0);
+			}
+			break;
+		case eBT_PRINT_TUNE_FILAMENT:
+			if (_btnFilamentEnabled2) {
+				LGT_Change_Page(ID_DIALOG_CHANGE_FILA_1);
+			}
+			break;
+
 		default: break;
 		}
 		break;
@@ -1564,7 +1615,6 @@ void LGT_SCR::LGT_Analysis_DWIN_Screen_Cmd()
 		/*else if (menu_type == eMENU_HOME_FILA)
 			xy_home = false;*/
 		break;
-	case ADDR_TXT_ABOUT_FW_SCREEN:
 
 	default:
 		break;
@@ -1612,37 +1662,44 @@ void LGT_SCR::LGT_Send_Data_To_Screen(unsigned int addr, float num, char axis)
 void LGT_SCR::LGT_Send_Data_To_Screen(unsigned int addr, char* buf)
 {
 	memset(data_storage, 0, sizeof(data_storage));
+	int len = strlen(buf);
 	data_storage[0] = Send_Data.head[0];
 	data_storage[1] = Send_Data.head[1];
-	data_storage[2] = 0x0A;
+	data_storage[2] = (unsigned char)(3 + len + 2)/* 0x0A */;
 	data_storage[3] = DW_CMD_VAR_W;
 	data_storage[4] = (unsigned char)(addr >> 8);
 	data_storage[5] = (unsigned char)(addr & 0x00FF);
-	for (int i = 0; i < 7; i++)
+	for (int i = 0; i < len /* 7 */; i++)
 	{
 		data_storage[6 + i] = buf[i];
 	}
-	for (int i = 0; i < 13; i++)
-
+	data_storage[6 + len] = 0xFF;
+	data_storage[6+ len + 1] = 0xFF; 
+	for (int i = 0; i < 6 + len + 2/* 13 */; i++)
 	{
 		MYSERIAL1.print(data_storage[i]);
 		delayMicroseconds(1);
 	}
+
+
 }
 void LGT_SCR::LGT_Send_Data_To_Screen1(unsigned int addr,const char* buf)
 {
 	memset(data_storage, 0, sizeof(data_storage));
+	int len = strlen(buf);
 	data_storage[0] = Send_Data.head[0];
 	data_storage[1] = Send_Data.head[1];
-	data_storage[2] = 0x22;
+	data_storage[2] = (unsigned char)(3+ len + 2)/* 0x22 */;
 	data_storage[3] = DW_CMD_VAR_W;
 	data_storage[4] = (unsigned char)(addr >> 8);
 	data_storage[5] = (unsigned char)(addr & 0x00FF);
-	for (int i = 0; i < 31; i++)
+	for (int i = 0; i < len/* 31 */; i++)
 	{
 		data_storage[6 + i] = buf[i];
 	}
-	for (int i = 0; i < 37; i++)
+	data_storage[6 + len] = 0xFF;
+	data_storage[6+ len + 1] = 0xFF;
+	for (int i = 0; i < 6 + len + 2/* 37 */; i++)
 
 	{
 		MYSERIAL1.print(data_storage[i]);
@@ -1822,25 +1879,45 @@ sta:disable or enable  (0000:disable  0001:enable)
 **************************************/
 void LGT_SCR::LGT_Disable_Enable_Screen_Button(unsigned int pageid, unsigned int buttonid, unsigned int sta) 
 {
-	memset(data_storage, 0, sizeof(data_storage));
-	data_storage[0] = Send_Data.head[0];
-	data_storage[1] = Send_Data.head[1];
-	data_storage[2] = 0x0B;
-	data_storage[3] = DW_CMD_VAR_W;
-	data_storage[4] = 0x00;
-	data_storage[5] = 0xB0;
-	data_storage[6] = 0x5A;
-	data_storage[7] = 0xA5;
-	data_storage[8] = (unsigned char)(pageid>>8);
-	data_storage[9] = (unsigned char)(pageid&0x00FF);
-	data_storage[10] = (unsigned char)(buttonid>>8);
-	data_storage[11] = (unsigned char)(buttonid & 0x00FF);
-	data_storage[12] = (unsigned char)(sta >> 8);
-	data_storage[13] = (unsigned char)(sta & 0x00FF);
-	for (int i = 0; i < 14; i++)
-	{
-		MYSERIAL1.print(data_storage[i]);
-		delayMicroseconds(1);
+
+	if (hasDwScreen()) {	
+		memset(data_storage, 0, sizeof(data_storage));
+		data_storage[0] = Send_Data.head[0];
+		data_storage[1] = Send_Data.head[1];
+		data_storage[2] = 0x0B;
+		data_storage[3] = DW_CMD_VAR_W;
+		data_storage[4] = 0x00;
+		data_storage[5] = 0xB0;
+		data_storage[6] = 0x5A;
+		data_storage[7] = 0xA5;
+		data_storage[8] = (unsigned char)(pageid>>8);
+		data_storage[9] = (unsigned char)(pageid&0x00FF);
+		data_storage[10] = (unsigned char)(buttonid>>8);
+		data_storage[11] = (unsigned char)(buttonid & 0x00FF);
+		data_storage[12] = (unsigned char)(sta >> 8);
+		data_storage[13] = (unsigned char)(sta & 0x00FF);
+		for (int i = 0; i < 14; i++)
+		{
+			MYSERIAL1.print(data_storage[i]);
+			delayMicroseconds(1);
+		}
+	} else if (hasJxScreen()) {
+		bool state = sta != 0 ? true : false;
+		if (pageid == ID_MENU_PRINT_HOME) {
+			if (buttonid == 5) {	// pause button
+				_btnPauseEnabled = state;
+			} else if (buttonid == 517) {	// filament1 button
+				// MYSERIAL0.print("fila1: ");
+				// MYSERIAL0.println(int(state));
+				_btnFilamentEnabled1 = state;
+			}
+		} else if (pageid == ID_MENU_PRINT_TUNE) {
+			if (buttonid == 1541 || buttonid == 1797) {		// filament2 button  LK4 Pro: 1541, LK1 Pro: 1797
+				// MYSERIAL0.print("fila2: ");
+				// MYSERIAL0.println(int(state));
+				_btnFilamentEnabled2 = state;
+			}
+		}		
 	}
 }
 void LGT_SCR::LGT_Save_Recovery_Filename(unsigned char cmd, unsigned char sys_cmd,unsigned int addr, unsigned int length)

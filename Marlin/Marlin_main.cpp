@@ -794,6 +794,7 @@ XYZ_CONSTS_FROM_CONFIG(signed char, home_dir, HOME_DIR);
 		#endif
     LGT_SCR::test();
     LGT_LCD.readScreenModel();
+    delay(1000); // wait for showing logo
 	}
 	void LGT_LCD_startup_settings()
 	{

@@ -31,10 +31,14 @@
 #define B_RUNAWAY_ERROR     "Error 13: B thermal runaway"
 
 // DWIN serial transfer protocol
-#define DW_FH_0 0x5A
-#define DW_FH_1 0xA5
-#define DW_CMD_VAR_W 0x82
-#define DW_CMD_VAR_R 0x83
+#define DW_FH_0 		  0x5A
+#define DW_FH_1 		  0xA5
+#define DW_CMD_VAR_W 	  0x82
+#define DW_CMD_VAR_R      0x83
+#define JX_CMD_REG_W      0x80
+#define JX_CMD_REG_R	  0x81
+#define JX_ADDR_REG_PAGE  0x03
+
 #define LEN_FILE_NAME 32
 #define LEN_WORD 2
 #define LEN_DWORD 4
@@ -256,7 +260,10 @@ enum E_BUTTON_KEY {
 	eBT_PRINT_FILA_CHANGE_YES,
 	eBT_PRINT_FILA_HEAT_NO,
 	eBT_PRINT_FILA_UNLOAD_OK,		//65 0041
-	eBT_PRINT_FILA_LOAD_OK
+	eBT_PRINT_FILA_LOAD_OK,
+
+	eBT_PRINT_HOME_FILAMENT,		// added for JX scrren
+	eBT_PRINT_TUNE_FILAMENT			// added for JX scrren
 };
 
 enum E_MENU_TYPE {
@@ -314,6 +321,9 @@ enum E_MENU_TYPE {
 #define ID_MENU_MEASU_S2            (114)
 #define ID_MENU_MEASU_S3            (116)
 #define ID_MENU_MEASU_FINISH        (123)
+
+#define ID_DIALOG_CHANGE_FILA_0     (130) // added for JX screen
+#define ID_DIALOG_CHANGE_FILA_1     (131) // added for JX screen
 
 enum ScreenModel {
 	SCREEN_DWIN_T5,
