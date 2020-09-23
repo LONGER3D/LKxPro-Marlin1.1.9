@@ -1863,7 +1863,7 @@ void Temperature::readings_ready() {
         || (soft_pwm_amount[e] > 0)
       #endif
     ;
-    if (rawtemp > maxttemp_raw[e] * tdir) max_temp_error(e);
+    if (rawtemp >= maxttemp_raw[e] * tdir) max_temp_error(e);
     if (rawtemp < minttemp_raw[e] * tdir && !is_preheating(e) && heater_on) {
       #ifdef MAX_CONSECUTIVE_LOW_TEMPERATURE_ERROR_ALLOWED
         if (++consecutive_low_temperature_error[e] >= MAX_CONSECUTIVE_LOW_TEMPERATURE_ERROR_ALLOWED)

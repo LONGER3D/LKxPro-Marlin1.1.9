@@ -96,7 +96,7 @@ void LGT_SCR::LGT_Change_Filament(int fila_len)
 	{
 		if (menu_type == eMENU_UTILI_FILA)
 		{
-			LGT_Change_Page(ID_DIALOG_PRINT_FILA_LOAD);
+			LGT_Change_Page(ID_DIALOG_UTILI_FILA_LOAD);
 		}
 		else if (menu_type == eMENU_HOME_FILA)
 		{
