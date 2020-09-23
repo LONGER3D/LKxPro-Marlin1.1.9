@@ -1130,8 +1130,11 @@ void LGT_SCR::LGT_Analysis_DWIN_Screen_Cmd()
 			break;
 		case eBT_PRINT_HOME_RESUME:
 				//wait_for_heatup = true;
-				LGT_Change_Page(ID_MENU_PRINT_HOME);
+				LGT_Change_Page(ID_DIALOG_PRINT_WAIT);
 			    do_blocking_move_to_xy(resume_x_position,resume_y_position,50); 
+				planner.synchronize();	// wait move done
+				LGT_Change_Page(ID_MENU_PRINT_HOME);
+
 			    card.startFileprint();
 				print_job_timer.start();
 		        runout.reset();
@@ -1157,6 +1160,8 @@ void LGT_SCR::LGT_Analysis_DWIN_Screen_Cmd()
 			thermalManager.setTargetHotend(PLA_E_TEMP, target_extruder);
 			status_type = PRINTER_HEAT;
 			thermalManager.setTargetBed(PLA_B_TEMP);
+			filament_temp = PLA_E_TEMP;
+
 			LGT_Send_Data_To_Screen(ADDR_VAL_TAR_E, thermalManager.target_temperature[0]);
 			delayMicroseconds(1);
 			LGT_Send_Data_To_Screen(ADDR_VAL_TAR_B, thermalManager.target_temperature_bed);
@@ -1168,6 +1173,8 @@ void LGT_SCR::LGT_Analysis_DWIN_Screen_Cmd()
 			thermalManager.setTargetHotend(ABS_E_TEMP, target_extruder);
 			status_type = PRINTER_HEAT;
 			thermalManager.setTargetBed(ABS_B_TEMP);
+			filament_temp = ABS_E_TEMP;
+
 			LGT_Send_Data_To_Screen(ADDR_VAL_TAR_E, thermalManager.target_temperature[0]);
 			delayMicroseconds(1);
 			LGT_Send_Data_To_Screen(ADDR_VAL_TAR_B, thermalManager.target_temperature_bed);
