@@ -77,7 +77,7 @@
 	#define FILAMENT_RUNOUT_MOVE_F 50
 #endif // LK1_Pro
 
-#define FW_TEST_TAG "T001"
+// #define FW_TEST_TAG "T001"
 #ifndef FW_TEST_TAG
 	#define FW_TEST_TAG ""
 #endif
