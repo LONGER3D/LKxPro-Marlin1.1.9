@@ -1182,7 +1182,11 @@ void Temperature::init() {
   #endif
 
   #if HAS_FAN0
-    SET_OUTPUT(FAN_PIN);
+    #if ENABLED(LGT_MAC)
+      OUT_WRITE(FAN_PIN, HIGH);
+    #else
+      SET_OUTPUT(FAN_PIN);
+    #endif
     #if ENABLED(FAST_PWM_FAN)
       setPwmFrequency(FAN_PIN, 1); // No prescaling. Pwm frequency = F_CPU/256/8
     #endif

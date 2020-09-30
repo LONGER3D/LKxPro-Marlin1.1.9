@@ -15588,6 +15588,7 @@ void setup() {
   //  check_print_job_recovery();
   //#endif
 #ifdef LGT_MAC
+    WRITE(FAN_PIN, LOW);  // turn off fan
 	  LGT_Init();
 #endif // LGT_MAC
 //
