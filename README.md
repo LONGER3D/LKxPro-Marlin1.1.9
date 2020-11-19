@@ -1,7 +1,7 @@
 # Marlin 3D Printer Firmware
 ## NOTE
 
-This firmware was mdified by Longer3D. It was based on Marlin 1.1.9 and applies to Longer LKxPro series(same apply to Ux0 Pro series). It set to "LK4 Pro" printer by default. If you want to change to other model, you need unremark related model definition(like "LK5_Pro") in Configuration.h.
+This firmware was modified by Longer3D. It was based on Marlin 1.1.9 and applies to Longer LKxPro series(same apply to Ux0 Pro series). It set to "LK4 Pro" printer by default. If you want to change to other model, you need unremark related model definition(like "LK5_Pro") in Configuration.h.
 
 <img align="right" src="../../raw/1.1.x/buildroot/share/pixmaps/logo/marlin-250.png" />
 
