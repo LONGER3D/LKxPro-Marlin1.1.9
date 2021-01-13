@@ -128,7 +128,7 @@
 				#ifdef LK1_Pro
 					#define LK1_Pro_AutoBed
 				#else
-        // #define LK4_Pro_BLTOUCH
+        #define LK4_Pro_BLTOUCH
         #ifdef LK5_Pro
           #define LK4_Pro
         #endif
