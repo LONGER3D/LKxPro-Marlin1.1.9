@@ -843,8 +843,8 @@
 	#define Z_PROBE_OFFSET_FROM_EXTRUDER 0 //0  // Z offset: -below +above  [the nozzle]
 #elif ENABLED(LK4_Pro_BLTOUCH) 
 	#define X_PROBE_OFFSET_FROM_EXTRUDER -36 // X offset: -left  +right  [of the nozzle]
-	#define Y_PROBE_OFFSET_FROM_EXTRUDER -4 // Y offset: -front +behind [the nozzle]
-	#define Z_PROBE_OFFSET_FROM_EXTRUDER -0.4 // Z offset: -below +above  [the nozzle]
+	#define Y_PROBE_OFFSET_FROM_EXTRUDER -10 // Y offset: -front +behind [the nozzle]
+	#define Z_PROBE_OFFSET_FROM_EXTRUDER -0 // Z offset: -below +above  [the nozzle]
 #endif // LK1_Pro_AutoBed
 
 // Certain types of probes need to stay away from edges
@@ -1113,7 +1113,7 @@
 
   // Set the number of grid points per dimension.
 #if ENABLED (LK1_Pro_AutoBed)||ENABLED(LK4_Pro_BLTOUCH)
-	#define GRID_MAX_POINTS_X 4
+	#define GRID_MAX_POINTS_X 5
 #else
 	//#define GRID_MAX_POINTS_X 3
 #endif
@@ -1127,10 +1127,10 @@
 	#define BACK_PROBE_BED_POSITION  247
 #endif
 #ifdef LK4_Pro_BLTOUCH
-	#define LEFT_PROBE_BED_POSITION  50
-	#define RIGHT_PROBE_BED_POSITION 170
-	#define FRONT_PROBE_BED_POSITION 50
-	#define BACK_PROBE_BED_POSITION  170
+	#define LEFT_PROBE_BED_POSITION  20
+	#define RIGHT_PROBE_BED_POSITION 180
+	#define FRONT_PROBE_BED_POSITION 20
+	#define BACK_PROBE_BED_POSITION  200
 #endif // LK4_Pro_BLTOUCH
 
   // Probe along the Y axis, advancing X after each column
