@@ -112,8 +112,8 @@
         // uncomment or comment LKx_Pro definition to change model
         // NOTE: shold only define one single model in the meantime
 			  // #define LK1_Pro
-        #define LK4_Pro
-        // #define LK5_Pro
+        // #define LK4_Pro
+        #define LK5_Pro
 
         // validation model definition
         #if defined(LK1_Pro) && !defined(LK4_Pro) && !defined(LK5_Pro)
@@ -122,17 +122,26 @@
         #elif !defined(LK1_Pro) && !defined(LK4_Pro) && !defined(LK5_Pro)
           #error "Not define any one printer model"
         #else
-          #error "Defined mutiple printer model at the same time"
+          #error "Defined multiple printer model at the same time"
         #endif
 
 				#ifdef LK1_Pro
 					#define LK1_Pro_AutoBed
 				#else
-        #define LK4_Pro_BLTOUCH
-        #ifdef LK5_Pro
-          #define LK4_Pro
-        #endif
-				#endif
+        
+          // #define LK4_Pro_BLTOUCH
+          #define LK5_Pro_BLTOUCH
+
+          #ifdef LK5_Pro
+            #define LK4_Pro
+          #endif
+
+          #ifdef LK5_Pro_BLTOUCH
+            #ifndef  LK4_Pro_BLTOUCH
+              #define LK4_Pro_BLTOUCH
+            #endif // ! LK4_Pro_BLTOUCH
+          #endif
+        #endif // LK1_Pro
 
 		#endif // LGT_MAC	
 	#endif // serial_port1
@@ -1126,7 +1135,13 @@
 	#define FRONT_PROBE_BED_POSITION 47
 	#define BACK_PROBE_BED_POSITION  247
 #endif
-#ifdef LK4_Pro_BLTOUCH
+
+#if ENABLED(LK5_Pro_BLTOUCH)
+	#define LEFT_PROBE_BED_POSITION  20
+	#define RIGHT_PROBE_BED_POSITION 260
+	#define FRONT_PROBE_BED_POSITION 20
+	#define BACK_PROBE_BED_POSITION  280
+#elif ENABLED(LK4_Pro_BLTOUCH)
 	#define LEFT_PROBE_BED_POSITION  20
 	#define RIGHT_PROBE_BED_POSITION 180
 	#define FRONT_PROBE_BED_POSITION 20
