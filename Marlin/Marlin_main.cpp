@@ -15589,6 +15589,7 @@ void setup() {
   //#endif
 #ifdef LGT_MAC
     WRITE(FAN_PIN, LOW);  // turn off fan
+    thermalManager.soft_pwm_amount_fan[0] = 0;
 	  LGT_Init();
 #endif // LGT_MAC
 //

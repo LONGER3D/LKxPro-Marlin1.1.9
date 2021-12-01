@@ -1184,6 +1184,7 @@ void Temperature::init() {
   #if HAS_FAN0
     #if ENABLED(LGT_MAC)
       OUT_WRITE(FAN_PIN, HIGH);
+      thermalManager.soft_pwm_amount_fan[0] = FAN_MAX_PWM;
       //---------------------------------------------- Set PWM frequency for D9 & D10 ------------------------------
       // TCCR2B = TCCR2B & B11111000 | B00000001;    // set timer 2 divisor to     1 for PWM frequency of 31372.55 Hz
       //TCCR2B = TCCR2B & B11111000 | B00000010;    // set timer 2 divisor to     8 for PWM frequency of  3921.16 Hz
