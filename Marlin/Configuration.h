@@ -110,19 +110,20 @@
 		#ifdef LGT_MAC
 			
         // uncomment or comment LKx_Pro definition to change model
-        // NOTE: shold only define one single model in the meantime
+        // NOTE: should only define one single model in the meantime
 			  // #define LK1_Pro
         // #define LK4_Pro
         #define LK5_Pro
 
-        // validation model definition
+
+        // validate model definition
         #if defined(LK1_Pro) && !defined(LK4_Pro) && !defined(LK5_Pro)
         #elif !defined(LK1_Pro) && defined(LK4_Pro) && !defined(LK5_Pro)
         #elif !defined(LK1_Pro) && !defined(LK4_Pro) && defined(LK5_Pro)
         #elif !defined(LK1_Pro) && !defined(LK4_Pro) && !defined(LK5_Pro)
           #error "Not define any one printer model"
         #else
-          #error "Defined mutiple printer model at the same time"
+          #error "Defined more than one printer model at the same time"
         #endif
 
 				#ifdef LK1_Pro

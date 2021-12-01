@@ -81,7 +81,7 @@
 #ifndef FW_TEST_TAG
 	#define FW_TEST_TAG ""
 #endif
-#define	BOARD_FW_VER    "0.3.5" FW_TEST_TAG "-Marlin" 
+#define	BOARD_FW_VER    "0.3.6" FW_TEST_TAG "-Marlin" 
 
 // DWIN system variable address
 #define DW_ADDR_CHANGE_PAGE 0x0084
