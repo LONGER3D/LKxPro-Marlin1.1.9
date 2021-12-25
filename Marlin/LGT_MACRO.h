@@ -77,11 +77,11 @@
 	#define FILAMENT_RUNOUT_MOVE_F 50
 #endif // LK1_Pro
 
-// #define FW_TEST_TAG "T001"
+#define FW_TEST_TAG "T001"
 #ifndef FW_TEST_TAG
 	#define FW_TEST_TAG ""
 #endif
-#define	BOARD_FW_VER    "0.3.6" FW_TEST_TAG "-Marlin" 
+#define	BOARD_FW_VER    "0.3.6" FW_TEST_TAG "-Marlin-BL" 
 
 // DWIN system variable address
 #define DW_ADDR_CHANGE_PAGE 0x0084
