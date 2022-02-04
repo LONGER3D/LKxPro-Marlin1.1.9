@@ -112,8 +112,8 @@
         // uncomment or comment LKx_Pro definition to change model
         // NOTE: shold only define one single model in the meantime
 			  // #define LK1_Pro
-        // #define LK4_Pro
-        #define LK5_Pro
+        #define LK4_Pro
+        //#define LK5_Pro
 
         // validation model definition
         #if defined(LK1_Pro) && !defined(LK4_Pro) && !defined(LK5_Pro)
@@ -129,8 +129,8 @@
 					#define LK1_Pro_AutoBed
 				#else
         
-          // #define LK4_Pro_BLTOUCH
-          #define LK5_Pro_BLTOUCH
+          //#define LK4_Pro_BLTOUCH
+          //#define LK5_Pro_BLTOUCH
 
           #ifdef LK5_Pro
             #define LK4_Pro
